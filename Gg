@@ -1,0 +1,97 @@
+local player = game.Players.LocalPlayer
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "RedMenuGui"
+screenGui.Parent = player:WaitForChild("PlayerGui")
+
+-- หน้าต่างหลัก (สีแดงเข้ม)
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 220, 0, 180)
+mainFrame.Position = UDim2.new(0, 50, 0, 50)
+mainFrame.BackgroundColor3 = Color3.fromRGB(180, 0, 0)
+mainFrame.BorderSizePixel = 0
+mainFrame.Parent = screenGui
+
+-- ปุ่มหัวข้อสำหรับย่อ/ขยาย
+local toggleBtn = Instance.new("TextButton")
+toggleBtn.Size = UDim2.new(1, 0, 0, 35)
+toggleBtn.BackgroundColor3 = Color3.fromRGB(220, 0, 0)
+toggleBtn.Text = "▼ เมนูควบคุม (คลิกย่อ)"
+toggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+toggleBtn.TextSize = 14
+toggleBtn.Parent = mainFrame
+
+-- กล่องเก็บปุ่มและช่องกรอกฟังก์ชัน
+local container = Instance.new("Frame")
+container.Size = UDim2.new(1, 0, 1, -35)
+container.Position = UDim2.new(0, 0, 0, 35)
+container.BackgroundTransparency = 1
+container.Parent = mainFrame
+
+-- ช่องกรอกเปอร์เซ็นต์ความเร็ว (TextBox)
+local speedInput = Instance.new("TextBox")
+speedInput.Size = UDim2.new(0.85, 0, 0, 30)
+speedInput.Position = UDim2.new(0.075, 0, 0.08, 0)
+speedInput.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+speedInput.TextColor3 = Color3.fromRGB(0, 0, 0)
+speedInput.PlaceholderText = "ใส่ % วิ่งไว (เช่น 1000)"
+speedInput.Text = ""
+speedInput.TextSize = 14
+speedInput.Parent = container
+
+-- ปุ่มที่ 1: ยืนยันการปรับความเร็ว
+local speedBtn = Instance.new("TextButton")
+speedBtn.Size = UDim2.new(0.85, 0, 0, 30)
+speedBtn.Position = UDim2.new(0.075, 0, 0.33, 0)
+speedBtn.BackgroundColor3 = Color3.fromRGB(240, 50, 50)
+speedBtn.Text = "1. ยืนยันวิ่งไว (% ตามช่องบน)"
+speedBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+speedBtn.Parent = container
+
+speedBtn.MouseButton1Click:Connect(function()
+    local char = player.Character
+    if char and char:FindFirstChild("Humanoid") then
+        local percent = tonumber(speedInput.Text)
+        if percent then
+            -- จำกัดค่าให้อยู่ระหว่าง 1,000% ถึง 200,000%
+            percent = math.clamp(percent, 1000, 200000)
+            speedInput.Text = tostring(percent) -- อัปเดตตัวเลขในช่องให้ถูกต้อง
+            
+            -- คำนวณความเร็ว (ฐานปกติของ Roblox คือ 16)
+            local calculatedSpeed = 16 * (percent / 100)
+            char.Humanoid.WalkSpeed = calculatedSpeed
+        else
+            speedInput.Text = "ใส่ตัวเลขเท่านั้น!"
+        end
+    end
+end)
+
+-- ปุ่มที่ 2: กระโดดสูง
+local jumpBtn = Instance.new("TextButton")
+jumpBtn.Size = UDim2.new(0.85, 0, 0, 30)
+jumpBtn.Position = UDim2.new(0.075, 0, 0.65, 0)
+jumpBtn.BackgroundColor3 = Color3.fromRGB(240, 50, 50)
+jumpBtn.Text = "2. กระโดดสูง (Jump 100)"
+jumpBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+jumpBtn.Parent = container
+
+jumpBtn.MouseButton1Click:Connect(function()
+    local char = player.Character
+    if char and char:FindFirstChild("Humanoid") then
+        char.Humanoid.UseJumpPower = true
+        char.Humanoid.JumpPower = 100
+    end
+end)
+
+-- ระบบย่อ/ขยายหน้าต่าง
+local isCollapsed = false
+toggleBtn.MouseButton1Click:Connect(function()
+    isCollapsed = not isCollapsed
+    container.Visible = not isCollapsed
+    if isCollapsed then
+        mainFrame.Size = UDim2.new(0, 220, 0, 35)
+        toggleBtn.Text = "▲ เมนูควบคุม (คลิกขยาย)"
+    else
+        mainFrame.Size = UDim2.new(0, 220, 0, 180)
+        toggleBtn.Text = "▼ เมนูควบคุม (คลิกย่อ)"
+    end
+end)
